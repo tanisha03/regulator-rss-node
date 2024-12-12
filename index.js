@@ -20,6 +20,8 @@ const rssFeeds = [
   { name: 'SEBI', url: 'https://www.sebi.gov.in/sebirss.xml' },
   { name: 'Services India', url: 'https://services.india.gov.in/feed/rss?cat_id=10&ln=en' },
   { name: 'Tax', url: 'https://tax.cyrilamarchandblogs.com/feed/' },
+  {name: 'MCA', url: 'https://www.mca.gov.in/Ministry/latestnews/MinistryNews.rss'}
+  // DPIT, MCA, FEMA, FDI, IRDAI, CCI, TRAI, FCCAI< CARC<, GST, ROC, DGFT, ITR, CBEC, INB
 ];
 
 function preprocessSEBIPubDate(pubDateString) {
