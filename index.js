@@ -72,6 +72,10 @@ async function fetchRSSFeeds(feeds, startDate, endDate) {
   return feedData;
 }
 
+app.get('/', async (req, res) => {
+  res.status(200).json('Up & Working');
+});
+
 // Route to trigger the fetching process and send JSON response
 app.get('/fetch-alerts', async (req, res) => {
   try {
