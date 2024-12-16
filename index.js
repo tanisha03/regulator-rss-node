@@ -3,76 +3,65 @@ const axios = require('axios');
 const RSSParser = require('rss-parser');
 const moment = require('moment'); // Add moment for date manipulation
 const cors = require('cors'); // Import CORS middleware
+const fetchRSSFeeds = require('./controllers/fetchRss');
+
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
+// const cron = require('cron').CronJob;
+// const nodemailer = require('nodemailer');
+const { diff_match_patch } = require('diff-match-patch');
 
 const app = express();
 const port = process.env.PORT || 8000;
 
-const rssParser = new RSSParser();
 
 // Enable CORS for all origins (you can configure specific origins if needed)
 app.use(cors());
 
-// List of RSS feed URLs
-const rssFeeds = [
-  { name: 'RBI Press Releases', url: 'https://rbi.org.in/pressreleases_rss.xml' },
-  { name: 'RBI Press Notifications', url: 'https://rbi.org.in/notifications_rss.xml' },
-  { name: 'RBI Press Publications', url: 'https://rbi.org.in/Publication_rss.xml' },
-  { name: 'SEBI', url: 'https://www.sebi.gov.in/sebirss.xml' },
-  { name: 'Services India', url: 'https://services.india.gov.in/feed/rss?cat_id=10&ln=en' },
-  { name: 'Tax', url: 'https://tax.cyrilamarchandblogs.com/feed/' },
-  {name: 'MCA', url: 'https://www.mca.gov.in/Ministry/latestnews/MinistryNews.rss'}
-  // DPIT, MCA, FEMA, FDI, IRDAI, CCI, TRAI, FCCAI< CARC<, GST, ROC, DGFT, ITR, CBEC, INB
-];
 
-function preprocessSEBIPubDate(pubDateString) {
-    // Handle the comma in SEBI's date format: "12 Dec, 2024 +0530"
-    if (pubDateString.includes(',')) {
-      return pubDateString.replace(',', '');
+async function fetchAndCompare(url) {
+  const browser = await puppeteer.launch({
+    args: ['--disable-http2'],
+    headless: false
+  });
+  const page = await browser.newPage();
+
+  // Set a custom user agent to avoid detection
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+
+  try {
+    await page.goto(url, { waitUntil: 'networkidle2' });
+    const content = await page.content();  // Get the page content (HTML)
+    console.log('----', content);
+
+    // Store snapshot in the root level of the project directory
+    const snapshotPath = path.join(__dirname, 'snapshot.txt');  // __dirname points to the current directory (root level)
+    let previousContent = '';
+    if (fs.existsSync(snapshotPath)) {
+      previousContent = fs.readFileSync(snapshotPath, 'utf-8');
     }
-    return pubDateString;
-  }
 
-// Function to fetch and parse RSS feeds
-async function fetchRSSFeeds(feeds, startDate, endDate) {
-  const feedData = [];
+    // Compare the current content with the previous content
+    const dmp = new diff_match_patch();
+    const diff = dmp.diff_main(previousContent, content);
+    dmp.diff_cleanupSemantic(diff);
 
-  // Iterate through all feeds
-  for (const feed of feeds) {
-    try {
-      console.log(`Fetching feed: ${feed.name}`);
-      const response = await axios.get(feed.url);
-      const parsedFeed = await rssParser.parseString(response.data);
-
-      console.log(`Parsed Feed for ${feed.name}:`, startDate, endDate);  // Log the entire parsed feed
-
-
-      const startDateUTC = moment.utc(startDate); 
-      const endDateUTC = moment.utc(endDate); 
-
-      // Filter items based on startDate and endDate
-      const feedItems = parsedFeed.items
-        .filter(item => {
-          let pubDateString = preprocessSEBIPubDate(item.pubDate);
-          const pubDateUTC = moment.utc(pubDateString, "DD MMM YYYY HH:mm:ss Z");  // Use the custom format for SEBI
-          return pubDateUTC.isBetween(startDateUTC, endDateUTC, null, '[]');
-        })
-        .map(item => ({
-          source: feed.name,
-          title: item.title,
-          link: item.link,
-          pubDate: item.pubDate,
-          contentSnippet: item.contentSnippet || ''
-        }));
-
-      feedData.push(...feedItems);
-    } catch (error) {
-      console.error(`Failed to fetch or parse feed from ${feed.name}:`, error.message);
-      // Skip the failed feed and continue with others
+    if (diff.length > 1) {  // Detect if there's any significant change
+      console.log('Change detected!');
+      // sendNotification(url);  // Notify if change detected
+      // Save the new content as the snapshot
+    } else {
+      console.log('No change detected.');
     }
+    fs.writeFileSync(snapshotPath, content);
+  } catch (error) {
+    console.error('Error navigating or scraping the page:', error);
+  } finally {
+    await browser.close();
   }
-
-  return feedData;
 }
+
 
 app.get('/', async (req, res) => {
   res.status(200).json('Up & Working');
@@ -81,33 +70,14 @@ app.get('/', async (req, res) => {
 // Route to trigger the fetching process and send JSON response
 app.get('/fetch-alerts', async (req, res) => {
   try {
-    const { timeRange } = req.query;
+    console.log('Fetching alerts...');  // Check if this gets logged
+    const feeds = await fetchRSSFeeds();
     
-    let parsedStartDate;
-    let parsedEndDate = moment(); // Default to the current time
-    
-    // Validate and calculate date range based on the timeRange query
-    if (timeRange) {
-      parsedStartDate = moment().subtract(Number(timeRange.replace('h', '')), 'hours');
-    } else {
-      parsedStartDate = moment().subtract(24, 'hours'); // Default to 24 hours
-    }
-
-    // Fetch RSS feed data with the selected date range
-    const feeds = await fetchRSSFeeds(rssFeeds, parsedStartDate, parsedEndDate);
-
-    // Generate output
-    const output = {
-      generatedAt: new Date().toISOString(),
-      alerts: feeds
-    };
-
-    // Send the JSON response
-    res.status(200).json(output);
-
+    // Ensure the response only happens after fetching is complete
+    res.json(feeds);
   } catch (error) {
-    console.error('Error occurred:', error);
-    res.status(500).json({ message: 'An error occurred while fetching alerts', error: error.message });
+    console.error('Error in /fetch-alerts route:', error);
+    res.status(500).json({ message: 'Error fetching alerts' });
   }
 });
 
@@ -115,3 +85,5 @@ app.get('/fetch-alerts', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+// fetchAndCompare('https://www.nseindia.com/invest/investors-regulatory-actions');
