@@ -39,23 +39,18 @@ function preprocessSEBIPubDate(pubDateString) {
  
 // Function to fetch and parse RSS feeds
 async function fetchRSSFeeds() {
-  const startDate = moment().subtract(24, 'hours'); // Default to 24 hours ago
-  const endDate = moment(); // Current time as end date
-
   const feedData = [];
   
   // Create an array of promises for each feed URL
   const feedPromises = rssFeeds.map(feed =>
     Promise.all(
-      feed.url.map(url => fetchAndParseRSS(url, feed.name, startDate, endDate))
+      feed.url.map(url => fetchAndParseRSS(url, feed.name))
     )
   );
 
   try {
     const results = await Promise.all(feedPromises);
-    console.log('Results from all feed promises:', results); // Debugging logs
 
-    // Flatten theresults and collect the valid ones
     results.forEach(feedResults => {
       feedResults.forEach(item => {
         if (item && item.length > 0) {

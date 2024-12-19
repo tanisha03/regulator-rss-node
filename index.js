@@ -35,7 +35,6 @@ async function fetchAndCompare(url) {
   try {
     await page.goto(url, { waitUntil: 'networkidle2' });
     const content = await page.content();  // Get the page content (HTML)
-    console.log('----', content);
 
     // Store snapshot in the root level of the project directory
     const snapshotPath = path.join(__dirname, 'snapshot.txt');  // __dirname points to the current directory (root level)
@@ -75,11 +74,11 @@ app.get('/fetch-alerts', async (req, res) => {
     console.log('Fetching alerts...');  // Check if this gets logged
     const feeds = await fetchRSSFeeds();
     const { createNotifications } = require('./utils/supabaseHelpers');
-    const { error } = createNotifications(feeds);
-    if(error){
+    const data = await createNotifications(feeds);
+    if(data.error){
       return res.status(500).json({ success: false, message: error.message });
     }
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, data: feeds });
   } catch (error) {
     console.error('Error in /fetch-alerts route:', error);
     res.status(500).json({ message: 'Error fetching alerts' });
