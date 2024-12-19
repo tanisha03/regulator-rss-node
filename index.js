@@ -1,10 +1,10 @@
 const express = require('express');
 const axios = require('axios');
+const dotenv = require('dotenv');
 const RSSParser = require('rss-parser');
 const moment = require('moment'); // Add moment for date manipulation
 const cors = require('cors'); // Import CORS middleware
 const fetchRSSFeeds = require('./controllers/fetchRss');
-const createNotifications = require('./utils/supabaseHelpers');
 
 const puppeteer = require('puppeteer');
 const fs = require('fs');
@@ -16,6 +16,7 @@ const { diff_match_patch } = require('diff-match-patch');
 const app = express();
 const port = process.env.PORT || 8000;
 
+dotenv.config();
 
 // Enable CORS for all origins (you can configure specific origins if needed)
 app.use(cors());
@@ -73,6 +74,7 @@ app.get('/fetch-alerts', async (req, res) => {
   try {
     console.log('Fetching alerts...');  // Check if this gets logged
     const feeds = await fetchRSSFeeds();
+    const { createNotifications } = require('./utils/supabaseHelpers');
     const { error } = createNotifications(feeds);
     if(error){
       return res.status(500).json({ success: false, message: error.message });
