@@ -72,7 +72,7 @@ async function fetchRSSFeeds() {
     const currentTimeUTC = moment.utc();  // Get the current UTC time
       let pubDateString = preprocessSEBIPubDate(item.pubDate);
       const pubDateUTC = moment.utc(pubDateString, "DD MMM YYYY HH:mm:ss Z");
-      return pubDateUTC.isAfter(currentTimeUTC.subtract(24, 'hours'));  // 24 hours filter
+      return pubDateUTC.isAfter(currentTimeUTC.subtract(60, 'minutes'));  // 60 minutes
     }); 
 }
 

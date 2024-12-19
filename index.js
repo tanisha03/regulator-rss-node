@@ -4,6 +4,7 @@ const RSSParser = require('rss-parser');
 const moment = require('moment'); // Add moment for date manipulation
 const cors = require('cors'); // Import CORS middleware
 const fetchRSSFeeds = require('./controllers/fetchRss');
+const createNotifications = require('./utils/supabaseHelpers');
 
 const puppeteer = require('puppeteer');
 const fs = require('fs');
@@ -72,12 +73,30 @@ app.get('/fetch-alerts', async (req, res) => {
   try {
     console.log('Fetching alerts...');  // Check if this gets logged
     const feeds = await fetchRSSFeeds();
-    
-    // Ensure the response only happens after fetching is complete
-    res.json(feeds);
+    const { error } = createNotifications(feeds);
+    if(error){
+      return res.status(500).json({ success: false, message: error.message });
+    }
+    res.status(200).json({ success: true });
   } catch (error) {
     console.error('Error in /fetch-alerts route:', error);
     res.status(500).json({ message: 'Error fetching alerts' });
+  }
+});
+
+app.get('/api/get-notifications', async (req, res) => {
+  try {
+    const { getAllNotifications } = require('./utils/supabaseHelpers');
+
+    const { data, error } = await getAllNotifications();
+    if (error) {
+      return res.status(500).json({ success: false, message: error.message });
+    }
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching interactions:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
