@@ -12,17 +12,17 @@ const rssFeeds = [
     'https://rbi.org.in/Publication_rss.xml'
   ]},
   { name: 'SEBI', url: ['https://www.sebi.gov.in/sebirss.xml'] },
-  // { name: 'NSE', url: [
-  //   'https://nsearchives.nseindia.com/content/RSS/Online_announcements.xml',
-  //   'https://nsearchives.nseindia.com/content/RSS/Corporate_Governance.xml',
-  //   'https://nsearchives.nseindia.com/content/RSS/Insider_Trading.xml',
-  //   'https://nsearchives.nseindia.com/content/RSS/Offer_Documents.xml',
-  //   'https://nsearchives.nseindia.com/content/RSS/Sast_Regulation29.xml',
-  //   'https://nsearchives.nseindia.com/content/RSS/Secretarial_Compliance.xml',
-  //   'https://nsearchives.nseindia.com/content/RSS/Sast_Regulation31.xml',
-  //   'https://nsearchives.nseindia.com/content/RSS/Shareholding_Pattern.xml',
-  //   'https://nsearchives.nseindia.com/content/RSS/Circulars.xml'
-  // ]},
+  { name: 'NSE', url: [
+    'https://nsearchives.nseindia.com/content/RSS/Online_announcements.xml',
+    'https://nsearchives.nseindia.com/content/RSS/Corporate_Governance.xml',
+    'https://nsearchives.nseindia.com/content/RSS/Insider_Trading.xml',
+    'https://nsearchives.nseindia.com/content/RSS/Offer_Documents.xml',
+    'https://nsearchives.nseindia.com/content/RSS/Sast_Regulation29.xml',
+    'https://nsearchives.nseindia.com/content/RSS/Secretarial_Compliance.xml',
+    'https://nsearchives.nseindia.com/content/RSS/Sast_Regulation31.xml',
+    'https://nsearchives.nseindia.com/content/RSS/Shareholding_Pattern.xml',
+    'https://nsearchives.nseindia.com/content/RSS/Circulars.xml'
+  ]},
 //   { name: 'ITR', url:['https://incometaxindia.gov.in/_layouts/15/Dit/Pages/Rss.aspx?List=Press%20Release']},
   { name: 'Services India', url: ['https://services.india.gov.in/feed/rss?cat_id=10&ln=en'] },
 //   { name: 'Tax', url: ['https://tax.cyrilamarchandblogs.com/feed/'] },
@@ -74,7 +74,7 @@ async function fetchRSSFeeds() {
  
 async function fetchAndParseRSS(url, feedName) {
     try {
-      const response = await axios.get(url, { timeout: 5000 });
+      const response = await axios.get(url, { timeout: 10000 });
       const parsedFeed = await rssParser.parseString(response.data);
       if (!parsedFeed.items || parsedFeed.items.length === 0) {
         console.log(`No items found in feed: ${feedName}`);
