@@ -101,9 +101,25 @@ app.get('/api/get-notifications', async (req, res) => {
   }
 });
 
+const rssFeeds = [
+  { name: 'ITR', url: ['https://incometaxindia.gov.in/_layouts/15/Dit/Pages/Rss.aspx?List=Press%20Release'] },
+];
+
+app.get('/check-changes', async (req, res) => {
+  try {
+    // Loop through each feed and check for changes
+    for (const feed of rssFeeds) {
+      for (const url of feed.url) {
+        await fetchAndCompare(url);
+      }
+    }
+    res.status(200).send('Change detection completed.');
+  } catch (error) {
+    res.status(500).send('An error occurred during the change detection.');
+  }
+});
+
 // Start the Express server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
-// fetchAndCompare('https://www.nseindia.com/invest/investors-regulatory-actions');
