@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
-const { diff_match_patch } = require('diff-match-patch');
+const { scrapeWeb } = require('../utils/constants');
 
 function sanitizeUrlToFilename(url) {
   return url
@@ -44,11 +44,21 @@ async function scrapeWeblink({ url, selectors, source }) {
       const results = [];
       const articleElements = document.querySelectorAll(selectors.articleSelector);
 
+      function extractText(ele, selector) {
+        if(selector?.includes('-n-')){
+          const [ item, index ] = selector.split('-n-'); 
+          return ele.querySelectorAll(item)?.[index-1];
+        } else return ele.querySelector(selector);
+      }
+
+      // if(source === 'Central Board Of Indirect Taxes & Customs')
+      // console.log('~~~~~~ here', articleElements);
+
       articleElements.forEach((element) => {
-        const link = element.querySelector(selectors.linkSelector)?.href || '';
-        const title = element.querySelector(selectors.nameSelector)?.innerText || '';
-        const pubDate = element.querySelector(selectors.dateSelector)?.innerText || '';
-        const contentSnippet = element.querySelector(selectors.contentSelector)?.innerText || '';
+        const link = extractText(element, selectors.linkSelector)?.href || extractText(element, selectors.linkSelector)?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1] ||'';
+        const title = extractText(element, selectors.nameSelector)?.innerText || '';
+        const pubDate = extractText(element, selectors.dateSelector)?.innerText?.replace('Publish Date : ', '') || new Date().getTime();
+        const contentSnippet = extractText(element, selectors.contentSelector)?.innerText || '';
         if (link) {
           results.push({ link, title, pubDate, contentSnippet });
         }
@@ -88,109 +98,6 @@ async function scrapeWeblink({ url, selectors, source }) {
     await browser.close();
   }
 }
-  
-
-const scrapeWeb = [
-  {
-    name: 'ITR',
-    url: 'https://incometaxindia.gov.in/_layouts/15/Dit/Pages/Rss.aspx?List=Press%20Release',
-    selectors: {
-      articleSelector: '.itemdiv',
-      linkSelector: '.mainlink',
-      nameSelector: '.mainlink',
-      dateSelector: null,
-      contentSelector: '.rssLink'
-    }
-  },
-  {
-    name: 'ITR',
-    url: 'https://incometaxindia.gov.in/_layouts/15/Dit/Pages/Rss.aspx?List=Latest%20Tax%20Updates',
-    selectors: {
-      articleSelector: '.itemdiv',
-      linkSelector: '.mainlink',
-      nameSelector: '.mainlink',
-      dateSelector: null,
-      contentSelector: '.rssLink'
-    }
-  },
-  {
-    name: 'BSE',
-    url: 'https://www.bseindia.com/investor_relations/announcement.html',
-    selectors: {
-      articleSelector: '.ng-scope',
-      linkSelector: '.tablebluelink',
-      nameSelector: 'a',
-      dateSelector: null,
-      contentSelector: null
-    }
-  },
-  {
-    name: 'BSE',
-    url: 'https://www.bseindia.com/investor_relations/corporategovernance.html',
-    selectors: {
-      articleSelector: '.ng-scope',
-      linkSelector: '.tablebluelink',
-      nameSelector: '.ng-binding',
-      dateSelector: null,
-      contentSelector: null
-    }
-  },
-  {
-    name: 'FSSAI',
-    url: 'https://fssai.gov.in/notifications.php',
-    selectors: {
-      articleSelector: '.grouptr12',
-      linkSelector: 'a',
-      nameSelector: 'strong',
-      dateSelector: null,
-      contentSelector: null
-    }
-  },
-  {
-    name: 'FSSAI',
-    url: 'https://fssai.gov.in/advisories.php',
-    selectors: {
-      articleSelector: '.odd',
-      linkSelector: 'a',
-      nameSelector: 'td',
-      dateSelector: null,
-      contentSelector: null
-    }
-  },
-  {
-    name: 'Directorate of Enforcement',
-    url: 'https://enforcementdirectorate.gov.in/press-release',
-    selectors: {
-      articleSelector: 'tr',
-      linkSelector: 'a',
-      nameSelector: '.views-field views-field-field-press-release-title',
-      dateSelector: '.views-field views-field-field-date-of-release',
-      contentSelector: null
-    }
-  },
-  {
-    name: 'Central Board Of Indirect Taxes & Customs',
-    url: 'https://www.cbic.gov.in/entities/whatsNew',
-    selectors: {
-      articleSelector: '.card solution_card',
-      linkSelector: 'a',
-      nameSelector: 'p',
-      dateSelector: '.date-time-stamp',
-      contentSelector: null
-    }
-  },
-  {
-    name: 'DGFT',
-    url: 'https://www.dgft.gov.in/CP/?opt=notification',
-    selectors: {
-      articleSelector: 'tr',
-      linkSelector: 'a',
-      nameSelector: 'td',
-      dateSelector: '.sorting_1',
-      contentSelector: null
-    }
-  }
-];
 
 async function fetchAndCompare() {
   try {

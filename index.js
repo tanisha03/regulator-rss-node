@@ -19,9 +19,6 @@ const port = process.env.PORT || 8000;
 
 dotenv.config();
 
-console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
-console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY);
-
 // Enable CORS for all origins (you can configure specific origins if needed)
 app.use(cors());
 
@@ -48,7 +45,7 @@ app.get('/fetch-alerts', async (req, res) => {
 
     if(changeData.length) {
       // Combine feeds and changes to create notifications
-      const { createNotifications } = require('./utils/supabaseHelpers');
+      // const { createNotifications } = require('./utils/supabaseHelpers');
 
       const notificationsData = await createNotifications(changeData);
 
