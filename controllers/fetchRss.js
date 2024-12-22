@@ -24,7 +24,7 @@ const rssFeeds = [
     'https://nsearchives.nseindia.com/content/RSS/Circulars.xml'
   ]},
 //   { name: 'ITR', url:['https://incometaxindia.gov.in/_layouts/15/Dit/Pages/Rss.aspx?List=Press%20Release']},
-  { name: 'Services India', url: ['https://services.india.gov.in/feed/rss?cat_id=10&ln=en'] },
+  // { name: 'Services India', url: ['https://services.india.gov.in/feed/rss?cat_id=10&ln=en'] },
 //   { name: 'Tax', url: ['https://tax.cyrilamarchandblogs.com/feed/'] },
   // { name: 'MCA', url: ['https://www.mca.gov.in/Ministry/latestnews/MinistryNews.rss'] }
 ];

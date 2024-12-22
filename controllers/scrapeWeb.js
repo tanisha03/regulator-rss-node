@@ -145,6 +145,50 @@ const scrapeWeb = [
       dateSelector: null,
       contentSelector: null
     }
+  },
+  {
+    name: 'FSSAI',
+    url: 'https://fssai.gov.in/advisories.php',
+    selectors: {
+      articleSelector: '.odd',
+      linkSelector: 'a',
+      nameSelector: 'td',
+      dateSelector: null,
+      contentSelector: null
+    }
+  },
+  {
+    name: 'Directorate of Enforcement',
+    url: 'https://enforcementdirectorate.gov.in/press-release',
+    selectors: {
+      articleSelector: 'tr',
+      linkSelector: 'a',
+      nameSelector: '.views-field views-field-field-press-release-title',
+      dateSelector: '.views-field views-field-field-date-of-release',
+      contentSelector: null
+    }
+  },
+  {
+    name: 'Central Board Of Indirect Taxes & Customs',
+    url: 'https://www.cbic.gov.in/entities/whatsNew',
+    selectors: {
+      articleSelector: '.card solution_card',
+      linkSelector: 'a',
+      nameSelector: 'p',
+      dateSelector: '.date-time-stamp',
+      contentSelector: null
+    }
+  },
+  {
+    name: 'DGFT',
+    url: 'https://www.dgft.gov.in/CP/?opt=notification',
+    selectors: {
+      articleSelector: 'tr',
+      linkSelector: 'a',
+      nameSelector: 'td',
+      dateSelector: '.sorting_1',
+      contentSelector: null
+    }
   }
 ];
 
