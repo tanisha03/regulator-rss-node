@@ -98,4 +98,4 @@ async function fetchAndParseRSS(url, feedName) {
     }
 } 
 
-module.exports = fetchRSSFeeds;
+module.exports = { fetchRSSFeeds };

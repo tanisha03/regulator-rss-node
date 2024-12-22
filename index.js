@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 const RSSParser = require('rss-parser');
 const moment = require('moment'); // Add moment for date manipulation
 const cors = require('cors'); // Import CORS middleware
-const fetchRSSFeeds = require('./controllers/fetchRss');
+const { fetchRSSFeeds } = require('./controllers/fetchRss');
+const { fetchAndCompare } = require('./controllers/scrapeWeb');
 
 const puppeteer = require('puppeteer');
 const fs = require('fs');
@@ -18,50 +19,11 @@ const port = process.env.PORT || 8000;
 
 dotenv.config();
 
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
+console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY);
+
 // Enable CORS for all origins (you can configure specific origins if needed)
 app.use(cors());
-
-
-async function fetchAndCompare(url) {
-  const browser = await puppeteer.launch({
-    args: ['--disable-http2'],
-    headless: false
-  });
-  const page = await browser.newPage();
-
-  // Set a custom user agent to avoid detection
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-
-  try {
-    await page.goto(url, { waitUntil: 'networkidle2' });
-    const content = await page.content();  // Get the page content (HTML)
-
-    // Store snapshot in the root level of the project directory
-    const snapshotPath = path.join(__dirname, 'snapshot.txt');  // __dirname points to the current directory (root level)
-    let previousContent = '';
-    if (fs.existsSync(snapshotPath)) {
-      previousContent = fs.readFileSync(snapshotPath, 'utf-8');
-    }
-
-    // Compare the current content with the previous content
-    const dmp = new diff_match_patch();
-    const diff = dmp.diff_main(previousContent, content);
-    dmp.diff_cleanupSemantic(diff);
-
-    if (diff.length > 1) {  // Detect if there's any significant change
-      console.log('Change detected!');
-      // sendNotification(url);  // Notify if change detected
-      // Save the new content as the snapshot
-    } else {
-      console.log('No change detected.');
-    }
-    fs.writeFileSync(snapshotPath, content);
-  } catch (error) {
-    console.error('Error navigating or scraping the page:', error);
-  } finally {
-    await browser.close();
-  }
-}
 
 
 app.get('/', async (req, res) => {
@@ -71,17 +33,41 @@ app.get('/', async (req, res) => {
 // Route to trigger the fetching process and send JSON response
 app.get('/fetch-alerts', async (req, res) => {
   try {
-    console.log('Fetching alerts...');  // Check if this gets logged
+    console.log('Fetching alerts and checking changes...');
+
+    // Fetch RSS feeds and content changes
     const feeds = await fetchRSSFeeds();
-    const { createNotifications } = require('./utils/supabaseHelpers');
-    const data = await createNotifications(feeds);
-    if(data.error){
-      return res.status(500).json({ success: false, message: error.message });
+    const data = await fetchAndCompare();
+
+    const changeData = [
+      ...feeds,
+      ...data
+    ];
+
+    console.log('Changes detected:', changeData);
+
+    if(changeData.length) {
+      // Combine feeds and changes to create notifications
+      const { createNotifications } = require('./utils/supabaseHelpers');
+
+      const notificationsData = await createNotifications(changeData);
+
+      if (notificationsData.error) {
+        console.error('Error creating notifications:', notificationsData.error);
+        return res.status(500).json({ success: false, message: notificationsData.error.message });
+      }
+
+      console.log('Notifications created successfully:', notificationsData);
     }
-    res.status(200).json({ success: true, data: feeds });
+
+    // Respond with combined data
+    res.status(200).json({
+      success: true,
+      feeds: changeData,
+    });
   } catch (error) {
     console.error('Error in /fetch-alerts route:', error);
-    res.status(500).json({ message: 'Error fetching alerts' });
+    res.status(500).json({ message: 'Error fetching alerts or creating notifications' });
   }
 });
 
@@ -98,24 +84,6 @@ app.get('/api/get-notifications', async (req, res) => {
   } catch (error) {
     console.error('Error fetching interactions:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-const rssFeeds = [
-  { name: 'ITR', url: ['https://incometaxindia.gov.in/_layouts/15/Dit/Pages/Rss.aspx?List=Press%20Release'] },
-];
-
-app.get('/check-changes', async (req, res) => {
-  try {
-    // Loop through each feed and check for changes
-    for (const feed of rssFeeds) {
-      for (const url of feed.url) {
-        await fetchAndCompare(url);
-      }
-    }
-    res.status(200).send('Change detection completed.');
-  } catch (error) {
-    res.status(500).send('An error occurred during the change detection.');
   }
 });
 
