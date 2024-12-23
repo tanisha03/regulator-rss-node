@@ -36,16 +36,18 @@ app.get('/fetch-alerts', async (req, res) => {
     const feeds = await fetchRSSFeeds();
     const data = await fetchAndCompare();
 
+    const dataChanged = data.map(i => ({...i, createdAt: new Date().getTime()}));
+
     const changeData = [
       ...feeds,
-      ...data
+      ...dataChanged
     ];
 
     console.log('Changes detected:', changeData);
 
     if(changeData.length) {
       // Combine feeds and changes to create notifications
-      // const { createNotifications } = require('./utils/supabaseHelpers');
+      const { createNotifications } = require('./utils/supabaseHelpers');
 
       const notificationsData = await createNotifications(changeData);
 
@@ -69,6 +71,23 @@ app.get('/fetch-alerts', async (req, res) => {
 });
 
 app.get('/api/get-notifications', async (req, res) => {
+  try {
+    const { getAllNotifications } = require('./utils/supabaseHelpers');
+
+    const { data, error } = await getAllNotifications();
+    if (error) {
+      return res.status(500).json({ success: false, message: error.message });
+    }
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching interactions:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+
+app.get('api//extract-details', async (req, res) => {
   try {
     const { getAllNotifications } = require('./utils/supabaseHelpers');
 

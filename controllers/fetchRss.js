@@ -63,7 +63,8 @@ async function fetchAndParseRSS(url, feedName) {
           title: item.title,
           link: item.link,
           pubDate: item.pubDate,
-          contentSnippet: item.contentSnippet.slice(0, 800) || ''
+          contentSnippet: item.contentSnippet.slice(0, 800) || '',
+          createdAt: new Date().getTime()
         }));
   
       return feedItems;
