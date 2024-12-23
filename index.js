@@ -36,7 +36,7 @@ app.get('/fetch-alerts', async (req, res) => {
     const feeds = await fetchRSSFeeds();
     const data = await fetchAndCompare();
 
-    const dataChanged = data.map(i => ({...i, createdAt: new Date().getTime()}));
+    const dataChanged = data?.length ? data.map(i => ({...i, createdAt: new Date().getTime()})) : [];
 
     const changeData = [
       ...feeds,
