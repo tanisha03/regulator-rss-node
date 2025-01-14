@@ -54,17 +54,17 @@ const scrapeWeb = [
       contentSelector: null
     }
   },
-  {
-    name: 'FSSAI',
-    url: 'https://fssai.gov.in/advisories.php',
-    selectors: {
-      articleSelector: 'tr',
-      linkSelector: 'a',
-      nameSelector: 'td-n-2',
-      dateSelector: 'td-n-3',
-      contentSelector: null
-    }
-  },
+  // {
+  //   name: 'FSSAI',
+  //   url: 'https://fssai.gov.in/advisories.php',
+  //   selectors: {
+  //     articleSelector: 'tr',
+  //     linkSelector: 'a',
+  //     nameSelector: 'td-n-2',
+  //     dateSelector: 'td-n-3',
+  //     contentSelector: null
+  //   }
+  // },
   {
     name: 'Directorate of Enforcement',
     url: 'https://enforcementdirectorate.gov.in/press-release',
@@ -108,12 +108,12 @@ const scrapeWeb = [
       dateSelector: 'span',
       contentSelector: null
     }
-  }
+  },
 ];
 
 const rssFeeds = [
   { name: 'RBI', url: [
-    'https://rbi.org.in/pressreleases_rss.xml', 
+    // 'https://rbi.org.in/pressreleases_rss.xml', 
     'https://rbi.org.in/notifications_rss.xml', 
     'https://rbi.org.in/Publication_rss.xml'
   ]},

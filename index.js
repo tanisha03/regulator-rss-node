@@ -4,8 +4,11 @@ const dotenv = require('dotenv');
 const RSSParser = require('rss-parser');
 const moment = require('moment'); // Add moment for date manipulation
 const cors = require('cors'); // Import CORS middleware
+const multer = require("multer");
 const { fetchRSSFeeds } = require('./controllers/fetchRss');
 const { fetchAndCompare } = require('./controllers/scrapeWeb');
+const upload = multer({ dest: "uploads/" });
+const { processContract } = require("./controllers/extractContract");
 
 const puppeteer = require('puppeteer');
 const fs = require('fs');
@@ -86,20 +89,21 @@ app.get('/api/get-notifications', async (req, res) => {
   }
 });
 
+app.post("/process-contract", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
 
-app.get('api//extract-details', async (req, res) => {
+  const filePath = path.resolve(req.file.path);
+
   try {
-    const { getAllNotifications } = require('./utils/supabaseHelpers');
-
-    const { data, error } = await getAllNotifications();
-    if (error) {
-      return res.status(500).json({ success: false, message: error.message });
-    }
-
-    res.status(200).json({ success: true, data });
+    const result = await processContract(filePath); // Your function to process the PDF
+    res.json(result);
   } catch (error) {
-    console.error('Error fetching interactions:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ error: error.message });
+  } finally {
+    // Clean up the uploaded file after processing
+    fs.unlinkSync(filePath);
   }
 });
 
