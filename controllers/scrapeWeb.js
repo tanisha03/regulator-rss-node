@@ -12,7 +12,7 @@ function sanitizeUrlToFilename(url) {
 
 async function scrapeWeblink({ url, selectors, source }) {
   const browser = await puppeteer.launch({
-    args: ['--disable-http2'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true,
   });
 
