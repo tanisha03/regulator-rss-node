@@ -9,6 +9,7 @@ const { fetchRSSFeeds } = require('./controllers/fetchRss');
 const { fetchAndCompare } = require('./controllers/scrapeWeb');
 const upload = multer({ dest: "uploads/" });
 const { processContract } = require("./controllers/extractContract");
+const http = require('http');
 
 const puppeteer = require('puppeteer');
 const fs = require('fs');
@@ -25,6 +26,7 @@ dotenv.config();
 // Enable CORS for all origins (you can configure specific origins if needed)
 app.use(cors());
 
+const server = http.createServer(app);
 
 app.get('/', async (req, res) => {
   res.status(200).json('Up & Working');
@@ -103,7 +105,6 @@ app.post("/process-contract", upload.single("file"), async (req, res) => {
   }
 });
 
-// Start the Express server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
