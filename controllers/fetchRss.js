@@ -4,6 +4,15 @@ const moment = require('moment');
 const { rssFeeds } = require('../utils/constants');
 
 const rssParser = new RSSParser();
+
+const getDate = (date) => {
+  try{
+    console.log(normalizeDateFormat(date))
+    return new Date(normalizeDateFormat(date)).toISOString()
+  } catch(e){
+    return new Date().toISOString()
+  }
+}
  
 function preprocessSEBIPubDate(pubDateString) {
   // Handle the comma in SEBI's date format: "12 Dec, 2024 +0530"
@@ -62,9 +71,9 @@ async function fetchAndParseRSS(url, feedName) {
           source: feedName,
           title: item.title,
           link: item.link,
-          pubDate: item.pubDate,
+          pubDate: getDate(item.pubDate),
           contentSnippet: item.contentSnippet.slice(0, 800) || '',
-          createdAt: new Date().getTime()
+          // createdAt: new Date().getTime()
         }));
   
       return feedItems;
