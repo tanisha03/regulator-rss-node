@@ -2,8 +2,8 @@ const fs = require("fs");
 const pdfParse = require("pdf-parse");
 const { OpenAI } = require("openai");
 const path = require("path");
-const Tesseract = require("tesseract.js");
-const { createCanvas } = require("canvas");
+// const Tesseract = require("tesseract.js");
+// const { createCanvas } = require("canvas");
 
 /**
  * Splits text into manageable chunks.
