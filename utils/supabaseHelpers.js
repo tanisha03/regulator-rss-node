@@ -87,10 +87,6 @@ const createNotifications = async (notifications) => {
     pubDate: getDate(item.pubDate)
   }));
 
-  console.log("SUPABASE_URL:", process.env.SUPABASE_URL);
-console.log("SUPABASE_ANON_KEY:", process.env.SUPABASE_ANON_KEY);
-console.log("list", transformedList, '-----');
-
   const { data, error } = await supabase.from('Notification').insert(transformedList);
 
     // Check if there was an error in the insertion
@@ -99,7 +95,6 @@ console.log("list", transformedList, '-----');
       throw new Error(error.message);
     }
 
-    // console.log('Notifications created successfully:', data);
     return {data, error: null};
 
   } catch (err) {
