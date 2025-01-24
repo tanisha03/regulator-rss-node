@@ -39,9 +39,11 @@ app.get('/fetch-alerts', async (req, res) => {
     const feeds = await fetchRSSFeeds();
     const data = await fetchAndCompare();
 
+    console.log('------ DATA', data, (data || []));
+
     const changeData = [
       ...feeds,
-      ...data
+      ...(data || [])
     ];
 
     if(changeData.length) {

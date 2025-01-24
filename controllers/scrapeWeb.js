@@ -1,4 +1,5 @@
-const puppeteer = require('puppeteer');
+const chromium = require("@sparticuz/chromium");
+const puppeteer = require("puppeteer-core");
 const fs = require('fs');
 const path = require('path');
 const { scrapeWeb } = require('../utils/constants');
@@ -11,18 +12,28 @@ function sanitizeUrlToFilename(url) {
 }
 
 async function scrapeWeblink({ url, selectors, source }) {
+  const executablePath = await chromium.executablePath();
+  console.log('Chromium executable path:', executablePath);
+
+  console.log('Chromium args:', chromium.args);
+
   const browser = await puppeteer.launch({
-    args: ['--disable-http2'],
-    headless: true,
+    args: [...chromium.args, '--no-sandbox'],
+    defaultViewport: chromium.defaultViewport,
+    executablePath,
+    headless: chromium.headless,
+    ignoreHTTPSErrors: true,
   });
   const page = await browser.newPage();
 
-  await page.setUserAgent(
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-  );
+  console.log('--------- page', page);
+
+  // await page.setUserAgent(
+  //   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+  // );
 
   try {
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { timeout: 60000 });  
 
     const sanitizedFilename = sanitizeUrlToFilename(url);
     const snapshotPath = path.join(__dirname, '../snapshots', `${sanitizedFilename}.json`);
@@ -111,7 +122,7 @@ async function fetchAndCompare() {
 
     return allNewArticles;
   } catch (error) {
-    return { error: error };
+    return null;
   }
 }
 

@@ -9,9 +9,9 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
+        "@sparticuz/chromium": "^131.0.1",
         "@supabase/supabase-js": "^2.47.10",
         "axios": "^1.3.5",
-        "canvas": "^2.11.2",
         "cors": "^2.8.5",
         "diff-match-patch": "^1.0.5",
         "dotenv": "^16.4.7",
@@ -22,6 +22,7 @@
         "pdf-parse": "^1.1.1",
         "pdfjs-dist": "^4.9.155",
         "puppeteer": "^23.10.4",
+        "puppeteer-core": "^24.1.1",
         "querystring": "^0.2.1",
         "rss-parser": "^3.11.0",
         "tesseract.js": "^5.1.1",
