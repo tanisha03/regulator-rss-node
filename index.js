@@ -39,14 +39,10 @@ app.get('/fetch-alerts', async (req, res) => {
     const feeds = await fetchRSSFeeds();
     const data = await fetchAndCompare();
 
-    const dataChanged = data?.length ? data.map(i => ({...i, createdAt: new Date().getTime()})) : [];
-
     const changeData = [
       ...feeds,
-      ...dataChanged
+      ...data
     ];
-
-    console.log('Changes detected:', changeData);
 
     if(changeData.length) {
       // Combine feeds and changes to create notifications
@@ -54,12 +50,10 @@ app.get('/fetch-alerts', async (req, res) => {
 
       const notificationsData = await createNotifications(changeData);
 
-      if (notificationsData.error) {
+      if (notificationsData?.error) {
         console.error('Error creating notifications:', notificationsData.error);
         return res.status(500).json({ success: false, message: notificationsData.error.message });
       }
-
-      console.log('Notifications created successfully:', notificationsData);
     }
 
     // Respond with combined data

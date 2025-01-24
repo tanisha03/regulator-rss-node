@@ -76,16 +76,36 @@ const getDate = (date) => {
 }
 
 const getAllNotifications = async () => {
-  return await supabase.from('NotificationSource').select();
+  return await supabase.from('Notification').select();
 };
 
 const createNotifications = async (notifications) => {
+  try {
   const transformedList = notifications.map(item =>({
     ...item,
     id: uuidv4(),
     pubDate: getDate(item.pubDate)
   }));
-  return await supabase.from('Notification').insert(transformedList);
+
+  console.log("SUPABASE_URL:", process.env.SUPABASE_URL);
+console.log("SUPABASE_ANON_KEY:", process.env.SUPABASE_ANON_KEY);
+console.log("list", transformedList, '-----');
+
+  const { data, error } = await supabase.from('Notification').insert(transformedList);
+
+    // Check if there was an error in the insertion
+    if (error) {
+      console.error('Error inserting notifications:', error);
+      throw new Error(error.message);
+    }
+
+    // console.log('Notifications created successfully:', data);
+    return {data, error: null};
+
+  } catch (err) {
+    console.error('Failed to create notifications:', err.message);
+    return {error : err};  // Rethrow or handle appropriately
+  }
 };
 
 module.exports = { getAllNotifications, createNotifications };
