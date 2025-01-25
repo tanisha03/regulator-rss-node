@@ -20,7 +20,7 @@
         "openai": "^4.77.0",
         "pdf-parse": "^1.1.1",
         "pdfjs-dist": "^4.9.155",
-        "puppeteer": "^23.10.4",
+        "puppeteer": "^19.7.2",
         "puppeteer-core": "^24.1.1",
         "querystring": "^0.2.1",
         "rss-parser": "^3.11.0",

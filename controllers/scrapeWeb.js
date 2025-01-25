@@ -12,6 +12,8 @@ function sanitizeUrlToFilename(url) {
 }
 
 async function scrapeWeblink({ url, selectors, source }) {
+  console.log('_____ path', puppeteer.executablePath())
+
   const browser = await puppeteer.launch({
     args: [
       "--disable-setuid-sandbox",
@@ -117,6 +119,7 @@ async function fetchAndCompare() {
 
     return allNewArticles;
   } catch (error) {
+    console.log('ERROR ----', error)
     return null;
   }
 }
