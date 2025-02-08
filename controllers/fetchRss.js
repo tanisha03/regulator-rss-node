@@ -48,12 +48,15 @@ async function fetchRSSFeeds() {
     console.error('Error in fetching RSS feeds:', error);
   }
 
-  return feedData.filter(item => {
-    const currentTimeUTC = moment.utc();  // Get the current UTC time
-      let pubDateString = preprocessSEBIPubDate(item.pubDate);
-      const pubDateUTC = moment.utc(pubDateString, "DD MMM YYYY HH:mm:ss Z");
-      return pubDateUTC.isAfter(currentTimeUTC.subtract(60, 'minutes'));  // 60 minutes
-    }); 
+
+  const { getSnapshot, saveSnapshot } = require('../utils/supabaseHelpers');
+  const res = await getSnapshot('rssFeed');
+  const existingTitles = res.map(item => item.title); // Extract titles from rssFeed
+
+  const filteredFeedData = feedData.filter(item => !existingTitles.includes(item.title)); 
+  console.log(feedData, '____ data', filteredFeedData, existingTitles);
+  saveSnapshot('rssFeed', filteredFeedData);
+  return filteredFeedData;
 }
 
  

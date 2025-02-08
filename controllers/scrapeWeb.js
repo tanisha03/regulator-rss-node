@@ -35,7 +35,6 @@ async function scrapeWeblink({ url, selectors, source }) {
     const sanitizedFilename = sanitizeUrlToFilename(url);
     const { getSnapshot, saveSnapshot } = require('../utils/supabaseHelpers');
     const res = await getSnapshot(sanitizedFilename);
-    console.log('++++++ res', res);
     let previousArticles = [];
     previousArticles = res;
     // const snapshotPath = path.join(__dirname, '../snapshots', `${sanitizedFilename}.json`);

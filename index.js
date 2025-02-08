@@ -38,13 +38,11 @@ app.get('/fetch-alerts', async (req, res) => {
     console.log('Fetching alerts and checking changes...');
 
     // Fetch RSS feeds and content changes
-    // const feeds = await fetchRSSFeeds();
+    const feeds = await fetchRSSFeeds();
     const data = await fetchAndCompare();
 
-    console.log('------ DATA', data, (data || []));
-
     const changeData = [
-      // ...feeds,
+      ...feeds,
       ...(data || [])
     ];
 
@@ -105,26 +103,19 @@ app.post("/process-contract", upload.single("file"), async (req, res) => {
   }
 });
 
-function sanitizeUrlToFilename(url) {
-  return url
-    .replace(/^https?:\/\//, '') // Remove protocol
-    .replace(/\//g, '_') // Replace slashes
-    .replace(/[^a-zA-Z0-9_-]/g, '_'); // Replace non-alphanumeric chars
-}
-
-app.get('/api/test', async (req, res) => {
-  try {
-    const sanitizedFilename = sanitizeUrlToFilename('https://enforcementdirectorate.gov.in/press-release');
-    console.log('Sanitized filename:', sanitizedFilename);
-    const { getSnapshot } = require('./utils/supabaseHelpers');
-    const res = await getSnapshot(sanitizedFilename);
-    console.log('++++++ res', res);
-    // const snapshotPath = path.join(__dirname, '../snapshots', `${sanitizedFilename}.json`);
-  } catch (error) {
-    console.error('Error fetching test:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
+// app.get('/api/test', async (req, res) => {
+//   try {
+//     const sanitizedFilename = sanitizeUrlToFilename('https://enforcementdirectorate.gov.in/press-release');
+//     console.log('Sanitized filename:', sanitizedFilename);
+//     const { getSnapshot } = require('./utils/supabaseHelpers');
+//     const res = await getSnapshot(sanitizedFilename);
+//     console.log('++++++ res', res);
+//     // const snapshotPath = path.join(__dirname, '../snapshots', `${sanitizedFilename}.json`);
+//   } catch (error) {
+//     console.error('Error fetching test:', error);
+//     res.status(500).json({ success: false, message: 'Internal server error' });
+//   }
+// });
 
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
