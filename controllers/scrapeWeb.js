@@ -33,17 +33,22 @@ async function scrapeWeblink({ url, selectors, source }) {
     await page.goto(url);
 
     const sanitizedFilename = sanitizeUrlToFilename(url);
-    const snapshotPath = path.join(__dirname, '../snapshots', `${sanitizedFilename}.json`);
-
-    const snapshotsDir = path.dirname(snapshotPath);
-    if (!fs.existsSync(snapshotsDir)) {
-      fs.mkdirSync(snapshotsDir, { recursive: true });
-    }
-
+    const { getSnapshot, saveSnapshot } = require('../utils/supabaseHelpers');
+    const res = await getSnapshot(sanitizedFilename);
+    console.log('++++++ res', res);
     let previousArticles = [];
-    if (fs.existsSync(snapshotPath)) {
-      previousArticles = JSON.parse(fs.readFileSync(snapshotPath, 'utf-8'));
-    }
+    previousArticles = res;
+    // const snapshotPath = path.join(__dirname, '../snapshots', `${sanitizedFilename}.json`);
+
+    // const snapshotsDir = path.dirname(snapshotPath);
+    // if (!fs.existsSync(snapshotsDir)) {
+    //   fs.mkdirSync(snapshotsDir, { recursive: true });
+    // }
+
+    // let previousArticles = [];
+    // if (fs.existsSync(snapshotPath)) {
+    //   previousArticles = JSON.parse(fs.readFileSync(snapshotPath, 'utf-8'));
+    // }
 
     const currentArticles = await page.evaluate((selectors) => {
       const results = [];
@@ -93,7 +98,8 @@ async function scrapeWeblink({ url, selectors, source }) {
       previousArticles.push(...newArticles);
 
       // Save updated snapshot
-      fs.writeFileSync(snapshotPath, JSON.stringify(previousArticles, null, 2));
+      saveSnapshot(sanitizedFilename, previousArticles)
+      // fs.writeFileSync(snapshotPath, JSON.stringify(previousArticles, null, 2));
     } else {
       console.log(`No new or updated articles on: ${url}`);
     }

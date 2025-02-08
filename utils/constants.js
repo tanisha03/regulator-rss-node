@@ -54,17 +54,6 @@ const scrapeWeb = [
       contentSelector: null
     }
   },
-  // {
-  //   name: 'FSSAI',
-  //   url: 'https://fssai.gov.in/advisories.php',
-  //   selectors: {
-  //     articleSelector: 'tr',
-  //     linkSelector: 'a',
-  //     nameSelector: 'td-n-2',
-  //     dateSelector: 'td-n-3',
-  //     contentSelector: null
-  //   }
-  // },
   {
     name: 'Directorate of Enforcement',
     url: 'https://enforcementdirectorate.gov.in/press-release',

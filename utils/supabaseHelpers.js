@@ -103,4 +103,27 @@ const createNotifications = async (notifications) => {
   }
 };
 
-module.exports = { getAllNotifications, createNotifications };
+const BUCKET_NAME = "snapshots"; 
+async function getSnapshot(snapshotPath) {
+  const { data, error } = await supabase.storage.from(BUCKET_NAME).download(`${snapshotPath}.json`);
+  if (error) {
+    if (error.status === 404) return []; // If file doesn't exist, return an empty array
+    throw error;
+  }
+  return JSON.parse(await data.text());
+}
+
+async function saveSnapshot(snapshotPath, snapshotData) {
+  const { error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .upload(`${snapshotPath}.json`, JSON.stringify(snapshotData, null, 2), {
+      contentType: "application/json",
+      upsert: true, // Overwrites if file already exists
+    });
+
+  if (error) {
+    console.error("Error uploading snapshot:", error);
+  }
+}
+
+module.exports = { getAllNotifications, createNotifications, getSnapshot, saveSnapshot };
