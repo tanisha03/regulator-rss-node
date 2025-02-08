@@ -46,6 +46,8 @@ app.get('/fetch-alerts', async (req, res) => {
       ...(data || [])
     ];
 
+    console.log('---- response:', changeData);
+
     if(changeData.length) {
       // Combine feeds and changes to create notifications
       const { createNotifications } = require('./utils/supabaseHelpers');
