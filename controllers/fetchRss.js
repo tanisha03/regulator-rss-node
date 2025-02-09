@@ -53,9 +53,11 @@ async function fetchRSSFeeds() {
   const res = await getSnapshot('rssFeed');
   const existingTitles = res.map(item => item.title); // Extract titles from rssFeed
 
+  console.log('~~~~~ cuurr', res.length);
   const filteredFeedData = feedData.filter(item => !existingTitles.includes(item.title)); 
-  console.log(feedData, '____ data', filteredFeedData, existingTitles);
-  saveSnapshot('rssFeed', filteredFeedData);
+  const finalList = [...filteredFeedData, ...res];
+  console.log('~~~~~ now', filteredFeedData.length, finalList.length);
+  saveSnapshot('rssFeed', finalList);
   return filteredFeedData;
 }
 

@@ -46,19 +46,19 @@ app.get('/fetch-alerts', async (req, res) => {
       ...(data || [])
     ];
 
-    console.log('---- response:', changeData);
+    console.log('---- response:', changeData. length, changeData);
 
-    if(changeData.length) {
-      // Combine feeds and changes to create notifications
-      const { createNotifications } = require('./utils/supabaseHelpers');
+    // if(changeData.length) {
+    //   // Combine feeds and changes to create notifications
+    //   const { createNotifications } = require('./utils/supabaseHelpers');
 
-      const notificationsData = await createNotifications(changeData);
+    //   const notificationsData = await createNotifications(changeData);
 
-      if (notificationsData?.error) {
-        console.error('Error creating notifications:', notificationsData.error);
-        return res.status(500).json({ success: false, message: notificationsData.error.message });
-      }
-    }
+    //   if (notificationsData?.error) {
+    //     console.error('Error creating notifications:', notificationsData.error);
+    //     return res.status(500).json({ success: false, message: notificationsData.error.message });
+    //   }
+    // }
 
     // Respond with combined data
     res.status(200).json({
